@@ -69,7 +69,8 @@ runs:
       # yamllint disable-line rule:line-length
       if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && inputs.npm-pack-release == 'true' }}
       shell: bash
-      run: echo "file=$(npm pack --ignore-scripts | tail -n1)" >> "$GITHUB_OUTPUT"
+      run: |
+        echo "file=$(npm pack --ignore-scripts | tail -n1)" >> "$GITHUB_OUTPUT"
     # yamllint disable-line rule:line-length
     - uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # 2.11.5
       name: Attach the tarball to a release
