@@ -1,0 +1,81 @@
+---
+name: mcvs-node-action
+description: |
+  The Mission Critical Vulnerability Scanner (MCVS) Node action.
+inputs:
+  node-version-file:
+    description: File that defines the Node version, e.g. .nvmrc.
+    default: .nvmrc
+  npm-pack-release:
+    description: |
+      If 'true', run npm pack and attach the tarball to the release when a tag
+      is pushed. Requires 'contents: write'.
+    default: "false"
+  token:
+    description: Token used to upload the release asset.
+    default: ${{ github.token }}
+runs:
+  using: composite
+  steps:
+    #
+    # Install the node version that has been defined in the .nvmrc file.
+    #
+    # yamllint disable-line rule:line-length
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+      with:
+        node-version-file: ${{ inputs.node-version-file }}
+    #
+    # Code security scanning.
+    #
+    # yamllint disable-line rule:line-length
+    - uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v6.2.0
+      with:
+        only-fixed: false
+        output-format: table
+        path: .
+        severity-cutoff: high
+    #
+    # If a lockfile exists in the project, then install the packages and audit
+    # them for high and critical vulnerabilities.
+    #
+    - name: Install and audit npm packages
+      shell: bash
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci --ignore-scripts
+          npm audit --audit-level=high
+        fi
+    #
+    # Run lint and tests if the scripts are defined in package.json.
+    #
+    - name: Code linting
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          npm run lint --if-present
+        fi
+    - name: Run tests
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          npm test --if-present
+        fi
+    #
+    # Create a tarball using npm pack and attach it to a release once a tag has
+    # been created.
+    #
+    - name: Create tarball using npm pack
+      id: pack
+      # yamllint disable-line rule:line-length
+      if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && inputs.npm-pack-release == 'true' }}
+      shell: bash
+      run: echo "file=$(npm pack --ignore-scripts | tail -n1)" >> "$GITHUB_OUTPUT"
+    # yamllint disable-line rule:line-length
+    - uses: svenstaro/upload-release-action@29e53e917877a24fad85510ded594ab3c9ca12de # 2.11.5
+      name: Attach the tarball to a release
+      if: ${{ steps.pack.outcome == 'success' }}
+      with:
+        repo_token: ${{ inputs.token }}
+        file: ${{ steps.pack.outputs.file }}
+        asset_name: ${{ steps.pack.outputs.file }}
+        tag: ${{ github.ref }}
