@@ -46,23 +46,9 @@ runs:
           npm audit --audit-level=high
         fi
     #
-    # Run lint and tests if the scripts are defined in package.json.
-    #
-    - name: Code linting
-      shell: bash
-      run: |
-        if [ -f package.json ]; then
-          npm run lint --if-present
-        fi
-    - name: Run tests
-      shell: bash
-      run: |
-        if [ -f package.json ]; then
-          npm test --if-present
-        fi
-    #
     # Create a tarball using npm pack and attach it to a release once a tag has
-    # been created.
+    # been created. This runs before lint and tests so that dependency code
+    # executed by those scripts cannot tamper with the released tarball.
     #
     - name: Create tarball using npm pack
       id: pack
@@ -80,3 +66,18 @@ runs:
         file: ${{ steps.pack.outputs.file }}
         asset_name: ${{ steps.pack.outputs.file }}
         tag: ${{ github.ref }}
+    #
+    # Run lint and tests if the scripts are defined in package.json.
+    #
+    - name: Code linting
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          npm run lint --if-present
+        fi
+    - name: Run tests
+      shell: bash
+      run: |
+        if [ -f package.json ]; then
+          npm test --if-present
+        fi
