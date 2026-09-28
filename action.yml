@@ -21,14 +21,14 @@ runs:
     # Install the node version that has been defined in the .nvmrc file.
     #
     # yamllint disable-line rule:line-length
-    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version-file: ${{ inputs.node-version-file }}
     #
     # Code security scanning.
     #
     # yamllint disable-line rule:line-length
-    - uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
+    - uses: anchore/scan-action@27805bf3b4e84b4a5c980df22ed233c00390a439 # v7.4.2
       with:
         only-fixed: false
         output-format: table
