@@ -1,5 +1,8 @@
 # MCVS-node-action
 
+[![GitHub release](https://img.shields.io/github/v/release/schubergphilis/mcvs-node-action)](https://github.com/schubergphilis/mcvs-node-action/releases)
+[![License](https://img.shields.io/github/license/schubergphilis/mcvs-node-action)](LICENSE)
+
 Mission Critical Vulnerability Scanner (MCVS) Node Action. Create Node code
 without high and critical vulnerabilities.
 
