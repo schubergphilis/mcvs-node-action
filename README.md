@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@some-hash # v6.0.2
+        with:
+          persist-credentials: false
       - uses: schubergphilis/mcvs-node-action@some-hash # v0.1.0
 ```
 
@@ -39,6 +41,7 @@ The action runs:
 1. Anchore (Grype) filesystem scan, failing on high/critical findings.
 2. `npm ci --ignore-scripts` and `npm audit --audit-level=high` if a
    `package-lock.json` exists.
-3. `npm run lint` and `npm test` if those scripts are defined.
-4. On a tag push with `npm-pack-release: "true"`, `npm pack` and upload the
-   tarball to the release.
+3. On a tag push with `npm-pack-release: "true"`, `npm pack` and upload the
+   tarball to the release. This happens before step 4 so lint and test code
+   cannot tamper with the released tarball.
+4. `npm run lint` and `npm test` if those scripts are defined.
