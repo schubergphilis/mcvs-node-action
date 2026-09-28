@@ -28,7 +28,7 @@ runs:
     # Code security scanning.
     #
     # yamllint disable-line rule:line-length
-    - uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v6.2.0
+    - uses: anchore/scan-action@e1165082ffb1fe366ebaf02d8526e7c4989ea9d2 # v7.4.0
       with:
         only-fixed: false
         output-format: table
