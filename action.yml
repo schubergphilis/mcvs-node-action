@@ -47,8 +47,9 @@ runs:
         fi
     #
     # Create a tarball using npm pack and attach it to a release once a tag has
-    # been created. This runs before lint and tests so that dependency code
-    # executed by those scripts cannot tamper with the released tarball.
+    # been created. Lint and tests are skipped in this case: they execute
+    # dependency code that could steal the contents:write token and tamper
+    # with the release. Run them in a separate read-only job instead.
     #
     - name: Create tarball using npm pack
       id: pack
@@ -67,15 +68,18 @@ runs:
         asset_name: ${{ steps.pack.outputs.file }}
         tag: ${{ github.ref }}
     #
-    # Run lint and tests if the scripts are defined in package.json.
+    # Run lint and tests if the scripts are defined in package.json, unless
+    # this is a release run (see above).
     #
     - name: Code linting
+      if: ${{ steps.pack.outcome == 'skipped' }}
       shell: bash
       run: |
         if [ -f package.json ]; then
           npm run lint --if-present
         fi
     - name: Run tests
+      if: ${{ steps.pack.outcome == 'skipped' }}
       shell: bash
       run: |
         if [ -f package.json ]; then
